@@ -1,0 +1,30 @@
+Assignment: Why My Cricket Team Keeps Losing the Second Innings
+
+We have lost eleven of our last fourteen matches in the colony league, and in
+nine of those defeats we were ahead at the halfway mark. That pattern seemed
+too consistent to be bad luck, so I kept a notebook for the whole season and
+wrote down what happened in every over after the break.
+
+The clearest finding is that our bowling changes are reactive. Our captain
+waits for a batsman to hit two boundaries before switching ends, by which
+point the batsman has settled and the field is already spread. In the four
+matches where a change came before the scoring rate climbed, we conceded
+fourteen fewer runs on average in the middle overs.
+
+Fielding was the second problem, though not in the way I expected. We drop
+very few catches. What we lose is the single that becomes a two because nobody
+backs up the throw. I counted thirty one overthrows across the season, which
+is roughly three matches' worth of margin in a league where most games finish
+within ten runs.
+
+The third factor is simply heat. Our home matches start at two in the
+afternoon, and our opening bowlers are also our top order, so they bat for an
+hour and then bowl without a proper break. The two games we played in the
+morning slot were both wins, which is far too small a sample to prove
+anything, but it is the only variable we can change without recruiting anyone.
+
+My suggestion to the team is unglamorous: rotate the bowling every three overs
+regardless of what the scoreboard says, assign a permanent backup fielder for
+every throw, and request the morning slot whenever the ground is free. None of
+this requires better players. It requires deciding these things before the
+match instead of during it.

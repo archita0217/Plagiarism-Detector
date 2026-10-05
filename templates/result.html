@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}PlagiScan · Plagiarism report{% endblock %}
+{% block content %}
+<div class="report-page">
+{% if error %}
+<section class="report-card notice-card">
+  <h1>We couldn't finish this check</h1>
+  <p class="report-meta">{{ error }}</p>
+  <div class="report-actions"><a class="primary" href="{{ url_for('index') }}">Start a new check</a></div>
+</section>
+{% elif pending %}
+<section class="report-card notice-card">
+  <h1>Your check is still running</h1>
+  <p class="report-meta">Reload this page in a moment to see the finished report.</p>
+</section>
+{% else %}
+<div class="report-top">
+  <div>
+    <div class="report-label">Plagiarism report</div>
+    <h1>{{ report.filename }}</h1>
+    <div class="report-meta">Checked {{ report.checked_at }}</div>
+  </div>
+  <div class="report-actions">
+    <a class="primary" href="{{ url_for('download', job_id=job_id, fmt='html') }}">
+      <svg viewBox="0 0 20 20"><path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12"/></svg>Download report</a>
+    <a href="{{ url_for('download', job_id=job_id, fmt='json') }}">JSON</a>
+    <a href="{{ url_for('index') }}">New check</a>
+  </div>
+</div>
+{{ body }}
+{% endif %}
+</div>
+{% endblock %}

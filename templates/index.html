@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}PlagiScan · Check plagiarism{% endblock %}
+{% block content %}
+<div class="landing">
+
+  <section class="hero">
+    <h1>See exactly which lines match the web.</h1>
+    <p class="hero-copy">Upload a paper, assignment or article. PlagiScan compares it with sources on the internet and highlights every passage that matches, with a link to where it came from.</p>
+
+    <ul class="hero-pills">
+      <li><svg viewBox="0 0 20 20"><path d="m5 10 3 3 7-7"/></svg>PDF, DOCX and text files</li>
+      <li><svg viewBox="0 0 20 20"><path d="m5 10 3 3 7-7"/></svg>Live web search</li>
+      <li><svg viewBox="0 0 20 20"><path d="m5 10 3 3 7-7"/></svg>Every match linked to its source</li>
+    </ul>
+
+    <div class="paper" aria-hidden="true">
+      <div class="paper-bar"><i></i><i></i><i></i></div>
+      <div class="paper-body">
+        <span class="ln" style="--w:94%"></span>
+        <span class="ln" style="--w:88%"></span>
+        <span class="ln mk flag" style="--w:96%"></span>
+        <span class="ln mk flag" style="--w:62%"><em>Matches a web source</em></span>
+        <span class="ln" style="--w:91%"></span>
+        <span class="ln" style="--w:84%"></span>
+        <span class="ln mk part" style="--w:78%"><em>Partly similar</em></span>
+        <span class="ln" style="--w:93%"></span>
+        <span class="ln" style="--w:47%"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="checker-card" id="checker">
+    <div class="card-body" id="cardBody">
+      <div class="card-head">
+        <h2>Check a document</h2>
+        <p>Upload a file or paste your text to begin.</p>
+      </div>
+
+      <div class="mode-tabs" role="tablist">
+        <button type="button" role="tab" id="tab-file" aria-selected="true">
+          <svg viewBox="0 0 20 20"><path d="M5 2.8h6l4 4v10.4H5V2.8Z"/><path d="M11 2.8v4h4"/></svg>
+          Upload file
+        </button>
+        <button type="button" role="tab" id="tab-text" aria-selected="false">
+          <svg viewBox="0 0 20 20"><path d="M4 4h12M4 8h12M4 12h8M4 16h12"/></svg>
+          Paste text
+        </button>
+      </div>
+
+      <form id="form">
+        <div id="pane-file">
+          <div class="dropzone" id="dropzone">
+            <div class="drop-content" id="prompt">
+              <div class="upload-icon">
+                <svg viewBox="0 0 32 32" fill="none"><path d="M16 21V7m0 0-5 5m5-5 5 5"/><path d="M8 19v6h16v-6"/></svg>
+              </div>
+              <h3>Drop your document here</h3>
+              <p>or <button type="button" class="inline-link" id="pick">browse files</button></p>
+              <div class="format-row">{{ extensions }} &nbsp;·&nbsp; up to {{ max_mb }} MB</div>
+            </div>
+
+            <div class="file-chip" id="fileChip" hidden>
+              <span class="file-icon" id="fileIcon"></span>
+              <div class="file-meta">
+                <strong id="fileName"></strong>
+                <span id="fileSize"></span>
+              </div>
+              <span class="file-ready"><i></i>Ready</span>
+              <button type="button" class="remove" id="fileRemove" aria-label="Remove file">×</button>
+            </div>
+            <input type="file" name="document" id="file" accept=".txt,.md,.rtf,.pdf,.docx" hidden>
+          </div>
+        </div>
+
+        <div id="pane-text" hidden>
+          <div class="text-editor">
+            <div class="editor-bar"><span>Paste your text below</span><span class="word-counter" id="wordCounter">0 words</span></div>
+            <textarea name="text" id="text" placeholder="Paste the passage, assignment or article you want to check…"></textarea>
+          </div>
+        </div>
+
+        <details class="advanced">
+          <summary>Advanced options</summary>
+          <div class="engine-select">
+            <label for="backend">Search engine</label>
+            <div class="select-wrap">
+              <select name="backend" id="backend">
+                <option value="duckduckgo" {% if backend=='duckduckgo' %}selected{% endif %}>DuckDuckGo · No API key</option>
+                <option value="google_cse" {% if backend=='google_cse' %}selected{% endif %}>Google Programmable Search</option>
+                <option value="serper" {% if backend=='serper' %}selected{% endif %}>Serper</option>
+              </select>
+              <span class="chevron" aria-hidden="true">⌄</span>
+            </div>
+          </div>
+        </details>
+
+        <button class="scan-btn" type="submit" id="submit">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <span class="btn-label">Check plagiarism</span>
+          <svg class="btn-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg>
+        </button>
+        <div class="error-banner" id="error" role="alert" hidden></div>
+      </form>
+    </div>
+
+    <!-- Scanning view: shown while a check is running -->
+    <div class="scan-view" id="progress" aria-live="polite" hidden>
+      <div class="scan-visual">
+        <div class="spinner-ring">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="ring-track" cx="50" cy="50" r="44"></circle>
+            <circle class="ring-spin" cx="50" cy="50" r="44"></circle>
+          </svg>
+          <b id="progressPct">0%</b>
+        </div>
+      </div>
+      <h2 id="scanTitle">Getting your document ready</h2>
+      <p class="scan-sub" id="scanSub">This can take a minute or two. Please keep this tab open.</p>
+
+      <div class="paper paper-scan" aria-hidden="true">
+        <div class="paper-body">
+          <span class="ln" style="--w:94%"></span>
+          <span class="ln" style="--w:86%"></span>
+          <span class="ln" style="--w:92%"></span>
+          <span class="ln" style="--w:70%"></span>
+          <span class="ln" style="--w:90%"></span>
+          <span class="ln" style="--w:55%"></span>
+        </div>
+        <div class="scan-line"></div>
+      </div>
+
+      <div class="progress-track"><i id="bar"></i></div>
+    </div>
+  </section>
+
+  <section class="feature-grid">
+    <article>
+      <span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3 20 7v5.5c0 4.7-3.2 7.7-8 9.5-4.8-1.8-8-4.8-8-9.5V7l8-4Z"/><path d="m8.3 12 2.4 2.4 5-5"/></svg></span>
+      <h3>Evidence, not just a score</h3>
+      <p>See the exact passages that matched and open the source behind each one.</p>
+    </article>
+    <article>
+      <span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 3-4 3 2 5-7"/></svg></span>
+      <h3>Clear results</h3>
+      <p>Copied and partly similar passages are colour-coded so you can tell them apart at a glance.</p>
+    </article>
+    <article>
+      <span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M7 3h10v18H7z"/><path d="M10 7h4M10 11h4M10 15h4"/></svg></span>
+      <h3>Reports you can keep</h3>
+      <p>Download the full report as an HTML file, or as JSON for your own tools.</p>
+    </article>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const tabs = { file: $('tab-file'), text: $('tab-text') };
+  const panes = { file: $('pane-file'), text: $('pane-text') };
+  function show(which) {
+    for (const key of ['file', 'text']) {
+      tabs[key].setAttribute('aria-selected', String(key === which));
+      panes[key].hidden = key !== which;
+    }
+  }
+  tabs.file.onclick = () => show('file');
+  tabs.text.onclick = () => show('text');
+
+  const dropzone = $('dropzone'), fileInput = $('file'), pickBtn = $('pick'), prompt = $('prompt');
+  const fileChip = $('fileChip'), fileIconEl = $('fileIcon'), fileNameEl = $('fileName'),
+        fileSizeEl = $('fileSize'), fileRemove = $('fileRemove');
+
+  const ICON_STYLES = { pdf:['#e2454b','PDF'], docx:['#3b5bdb','DOC'], doc:['#3b5bdb','DOC'],
+                        txt:['#5f6888','TXT'], md:['#5f6888','MD'], rtf:['#5f6888','RTF'] };
+  function iconSvg(ext) {
+    const s = ICON_STYLES[ext] || ['#5f6888', ext.slice(0,4).toUpperCase()];
+    return `<svg width="42" height="50" viewBox="0 0 42 50" aria-hidden="true"><path d="M5 2h22l10 10v34a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#fff" stroke="#cfd4e6"/><path d="M27 2v9a2 2 0 0 0 2 2h8" fill="#eef0f7" stroke="#cfd4e6"/><rect x="3" y="34" width="34" height="14" rx="2" fill="${s[0]}"/><text x="20" y="44" text-anchor="middle" font-family="Hanken Grotesk, sans-serif" font-size="8" font-weight="700" fill="#fff">${s[1]}</text></svg>`;
+  }
+  function formatSize(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(0) + ' KB'; return (b/1048576).toFixed(1) + ' MB'; }
+  function showFile(file) {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    fileIconEl.innerHTML = iconSvg(ext); fileNameEl.textContent = file.name; fileNameEl.title = file.name;
+    fileSizeEl.textContent = formatSize(file.size); prompt.hidden = true; fileChip.hidden = false;
+  }
+  function clearFile() { fileInput.value = ''; prompt.hidden = false; fileChip.hidden = true; }
+  pickBtn.onclick = () => fileInput.click();
+  fileChip.onclick = e => { if (e.target !== fileRemove) fileInput.click(); };
+  fileInput.onchange = () => { if (fileInput.files.length) showFile(fileInput.files[0]); };
+  fileRemove.onclick = e => { e.stopPropagation(); clearFile(); };
+  ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragging'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragging'); }));
+  dropzone.addEventListener('drop', e => { if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; showFile(e.dataTransfer.files[0]); } });
+
+  const text = $('text'), counter = $('wordCounter');
+  text.addEventListener('input', () => {
+    const n = (text.value.trim().match(/\S+/g) || []).length;
+    counter.textContent = n + ' word' + (n === 1 ? '' : 's');
+  });
+
+  const form = $('form'), submit = $('submit'), label = submit.querySelector('.btn-label');
+  const cardBody = $('cardBody'), card = $('checker'), scan = $('progress');
+  const bar = $('bar'), pct = $('progressPct'), errorBox = $('error');
+  const scanTitle = $('scanTitle'), scanSub = $('scanSub');
+
+  // Plain-language status shown to the customer for each stage
+  const COPY = {
+    starting:  ['Getting your document ready', 'This can take a minute or two. Please keep this tab open.'],
+    reading:   ['Reading your document', 'Getting the text ready to check.'],
+    searching: ['Checking your text against the web', 'Looking for passages that appear elsewhere.'],
+    fetching:  ['Reviewing possible matches', 'Taking a closer look at the pages that turned up.'],
+    comparing: ['Preparing your report', 'Almost done. Putting the results together.'],
+    done:      ['All done', 'Opening your report…']
+  };
+  const stageWeight = { starting:5, reading:10, searching:55, fetching:85, comparing:95, done:100 };
+
+  function setStage(stage) {
+    const c = COPY[stage] || COPY.starting;
+    if (scanTitle.textContent !== c[0]) { scanTitle.textContent = c[0]; scanSub.textContent = c[1]; }
+  }
+  function setScanning(on) {
+    card.classList.toggle('is-scanning', on);
+    cardBody.hidden = on; scan.hidden = !on;
+  }
+  function fail(message) {
+    errorBox.textContent = message; errorBox.hidden = false;
+    setScanning(false); submit.disabled = false; submit.classList.remove('loading');
+    label.textContent = 'Check plagiarism';
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault(); errorBox.hidden = true;
+    const data = new FormData(form);
+    if (panes.file.hidden) data.delete('document'); else data.delete('text');
+    submit.disabled = true; submit.classList.add('loading'); label.textContent = 'Starting…';
+    bar.style.width = '4%'; pct.textContent = '0%'; setStage('starting');
+    try {
+      const response = await fetch('/check', { method: 'POST', body: data });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'The check could not start.');
+      setScanning(true); poll(payload.job_id);
+    } catch (err) { fail(err.message); }
+  });
+
+  function poll(jobId) {
+    const timer = setInterval(async () => {
+      try {
+        const response = await fetch('/progress/' + jobId), state = await response.json();
+        if (state.status === 'error') { clearInterval(timer); fail(state.error); return; }
+        if (state.status === 'done') {
+          clearInterval(timer); setStage('done'); bar.style.width = '100%'; pct.textContent = '100%';
+          window.location = state.result_url; return;
+        }
+        setStage(state.stage);
+        const base = stageWeight[state.stage] || 5, span = state.total ? (state.current / state.total) * 12 : 0;
+        const value = Math.min(base + span, 97);
+        bar.style.width = value + '%'; pct.textContent = Math.round(value) + '%';
+      } catch (err) { clearInterval(timer); fail('Lost contact with the server. Please try again.'); }
+    }, 900);
+  }
+})();
+</script>
+{% endblock %}
